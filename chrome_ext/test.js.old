@@ -1,0 +1,155 @@
+/*
+console.log("HI");
+$("body").css("background", "black");
+*/
+/*
+$("body").append('<div id="fb-root"></div>');
+$("body").append("<div id='sharecontainer'><button id='share'>Share</button></div>");
+$("#sharecontainer").css({
+  "position": "absolute",
+  "left": 0,
+  "top": 0
+});
+
+$("#share").click(function() {
+  var message = "This website is really interesting! " + window.location;
+*/
+  /*
+  $.post("https://graph.facebook.com/geraldgfong/feed", {
+  "access_token": "AAACEdEose0cBANfOIWZB3aizbioM81kPxd4tzKf6rW2DQz67Nk0wN8lkFOa7303XAztxxseTBUCsNoePQtN4MJeHgAqpGhYIwh0gO6HGOAlUqwpOU",
+  "message": message});*/
+  /*$.post("https://api.twitter.com/1.1/statuses/update.json", {
+  "status": message,
+  "header": 'Authorization: OAuth oauth_consumer_key="y5E9Ga4BPPNQ3lO6tkGpug", oauth_nonce="ed1b38789c5a2d5c34ea82104688d3cf", oauth_signature="a78GUlEGKc8CIGI%2BVGYr1AFsqdk%3D", oauth_signature_method="HMAC-SHA1", oauth_timestamp="1351985565", oauth_token="276849921-P4GplvvDxOKhyVzydJAZqYxWbvKT9XrAZgnODTzo", oauth_version="1.0"'
+  });
+*/
+  /*
+  $.ajax({
+    type: "POST",
+    url: "https://api.twitter.com/1.1/statuses/update.json",
+    header: 'Authorization: OAuth oauth_consumer_key="y5E9Ga4BPPNQ3lO6tkGpug", oauth_nonce="743cc82e5b85c450e455e7aee8c9a809", oauth_signature="VwqQ1nqHJby4KJEXu%2F1YHvYhtKc%3D", oauth_signature_method="HMAC-SHA1", oauth_timestamp="1351989675", oauth_token="276849921-P4GplvvDxOKhyVzydJAZqYxWbvKT9XrAZgnODTzo", oauth_version="1.0"',
+    data: {
+      "status": "Hi"
+    }
+  });
+});
+*/
+
+
+
+
+
+/*console.log(window.location.href);
+if (window.location.href.indexOf("http://wlan.berkeley.edu/login") != -1) {
+$($("input")[1]).click();
+}
+
+if(window.location.href.indexOf("https://wlan.berkeley.edu/cgi-bin/login/calnet.cgi") != -1) {
+window.location = $($("#ucbito_main_mid_container a")[1]).attr('href');
+}*/
+/*var bridge = new Bridge( {host: "cloud2.flotype.com", port: 8091, apiKey: "abcdefgh"});
+bridge.connect();
+
+var left = 0;
+var top1 = 0;
+console.log(top1);
+
+var width = $(window).width();
+var height = $(window).height();
+
+// returns the center x y coordinate
+var clickFrame = function(frameNum) {
+var frame = $("#frame" + frameNum);
+
+left = frame.offset().left;
+top1 = frame.offset().top;
+width = frame.width();
+height = frame.height();
+
+shiftFrame(frame.offset().left, frame.offset().top, frame.width(), frame.height());
+return {x: left + Math.floor(width/2), y: top1 + Math.floor(height/2)};
+};
+
+//setInterval(function() {clickFrame(Math.floor(Math.random() * 9))}, 2000);
+
+var shiftFrame = function(left, top, width, height) {
+$("#orange-frame").offset({left: left, top: top}).width(width).height(height);
+//$("#orange-frame").animate({left: left, top: top, width: width, height: height});
+}
+
+var updateFrame = function() {
+console.log(top1);
+
+shiftFrame(left, top1, width, height);
+}
+
+var scrollDown = function() {
+$("body").animate({scrollTop: '+=100'});
+}
+var scrollUp = function() {
+$("body").animate({scrollTop: '-=100'});
+}
+var scrollLeft = function() {
+$("body").animate({scrollLeft: '-=100'});
+}
+var scrollRight = function() {
+$("body").animate({scrollLeft: '+=100'});
+}
+
+
+
+
+*/
+console.log("HI");
+var barrelRollStyle = $('<style>.barrel_roll_left {-webkit-transition: -webkit-transform 3s ease;-webkit-transform: rotate(-360deg);'+
+'-moz-transition: -moz-transform 3s ease; -moz-transform: rotate(360deg); -o-transition: -o-transform 4s ease;'+
+'-o-transform: rotate(360deg);transition: transform 3s ease;transform: rotate(360deg);} </style>');
+$('html > head').append(barrelRollStyle);
+
+var barrelRollStyle = $('<style>.barrel_roll_right {-webkit-transition: -webkit-transform 3s ease;-webkit-transform: rotate(360deg);'+
+'-moz-transition: -moz-transform 3s ease; -moz-transform: rotate(360deg); -o-transition: -o-transform 4s ease;'+
+'-o-transform: rotate(360deg);transition: transform 3s ease;transform: rotate(360deg);} </style>');
+
+$('html > head').append(barrelRollStyle);
+
+function barrelRollLeft() {
+console.log("doing barrel roll left");
+$('body').addClass('barrel_roll_left');
+setTimeout(function() {
+$('body').removeClass('barrel_roll_left')
+}, 4000);
+setTimeout(function() {
+updateFrame();
+}, 3600);
+}
+
+setTimeout(barrelRollLeft, 2000);
+
+function barrelRollRight() {
+$('body').addClass('barrel_roll_right');
+setTimeout(function() {
+$('body').removeClass('barrel_roll_right')
+}, 4000);
+setTimeout(function() {
+updateFrame();
+}, 3600);
+}
+
+/*
+var remoteFuncs = {
+// pass 0 to 3 corresponding to the 4 frames left to right, top to bottom
+clickFrame: clickFrame,
+scrollDown: scrollDown,
+scrollUp: scrollUp,
+scrollLeft: scrollLeft,
+scrollRight: scrollRight,
+barrelRollLeft: barrelRollLeft,
+barrelRollRight: barrelRollRight
+}
+
+
+
+bridge.ready(function() {
+bridge.publishService("log", remoteFuncs);
+});
+*/
