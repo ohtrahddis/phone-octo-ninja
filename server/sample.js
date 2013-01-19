@@ -1,4 +1,4 @@
-var Devices = require("./device")
+var Devices = require("../lib/device")
 var devices = {
     peter : {
         tap : function(options, callback) {
