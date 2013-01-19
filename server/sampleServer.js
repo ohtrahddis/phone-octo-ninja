@@ -7,17 +7,10 @@ var devices = {
         },
         on : function(options, callback) {
             console.log(arguments);
-            callback();
+            callback({ status : "success"});
         }
     }
 }
 //SET UP
 var remote = new Devices.Client.Remote(devices);
 remote.listen(8080);
-
-var client = new Devices.Driver.Remote('localhost', 8080);
-var peter = new Devices.Device("peter", client);
-console.log(peter)
-peter.tap(function(result) {
-    console.log(result);
-});
