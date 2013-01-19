@@ -1,4 +1,4 @@
-var BinaryRemote = function(ip, port, devices) {
+var BinaryRemote = function(ip, port, drivers) {
   var fullAddress = "ws://"+ip+":"+port;
   var client = new BinaryClient("ws://"+ip+":"+port);
   client.on('stream', function(stream)  {
