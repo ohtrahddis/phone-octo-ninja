@@ -90,13 +90,11 @@ function testToggleMusic() {
 
 
 var devices = {
-  browser: {
-    barrelRollLeft: barrelRollLeft,
-    barrellRollRight: barrelRollRight,
-    pauseMusic: pauseMusic,
-    playMusic: playMusic,
-    toggleMusic: toggleMusic
-  }
+  barrelRollLeft: barrelRollLeft,
+  barrellRollRight: barrelRollRight,
+  pauseMusic: pauseMusic,
+  playMusic: playMusic,
+  toggleMusic: toggleMusic
 };
 
 console.log(devices.browser.barrelRollLeft);
