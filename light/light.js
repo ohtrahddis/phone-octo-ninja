@@ -63,5 +63,5 @@ var devices = {
 }
 
 
-var remote = new Devices.Client.Remote(devices);
+var remote = new Devices.Driver.TCP(devices);
 remote.listen(8080);
