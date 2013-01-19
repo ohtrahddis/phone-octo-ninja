@@ -9,8 +9,6 @@ var arduino = new Arduino("/dev/ttyACM0", {});
 //server.listen(8000);
 
 //SET UP
-var remote = new Devices.Client.Remote(devices);
-remote.listen(8080);
 
 var pin = 13;
 var status = false;
@@ -21,31 +19,49 @@ arduino.ready(function() {
 	});
 });
 
+function tap() {
+	if(status == true) {
+		off();
+	}
+	else if(status == false) {
+		on();
+	}
+}
+
+function on() {
+	arduino.pin.init(pin, function() {
+		arduino.pin.digitalWrite(pin, false);
+	});
+	status = false;
+}
+
+function off() {
+	arduino.pin.init(pin, function() {
+		arduino.pin.digitalWrite(pin, true);
+	});
+	status = true;
+}
+
 var devices = {
     arduino : {
         tap : function(options, callback) {
             console.log("I WAS TAPPED");
-            if(status == true) {
-				arduino.pin.init(pin, function() {
-					arduino.pin.digitalWrite(pin, false);
-				});
-				status = false;
-			}
-			else if(status == false) {
-				arduino.pin.init(pin, function() {
-					arduino.pin.digitalWrite(pin, true);
-				});
-				status = true;
-			}
+            tap();
             callback({ status : 'success'})
         },
         on : function(options, callback) {
-            console.log(arguments);
-            arduino.pin.init(pin, function() {
-				arduino.pin.digitalWrite(pin, true);
-			});
-			status = true;
+            console.log("TURN ON");
+            on();
             callback({ status : 'success' });
+        },
+        off : function(options, callback) {
+        	console.log("TURN OFF");
+        	off()
+        	callback( { status : 'success' } );
         }
     }
 }
+
+
+var remote = new Devices.Client.Remote(devices);
+remote.listen(8080);
