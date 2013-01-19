@@ -60,6 +60,17 @@ function pauseMusic(option, callback) {
   callback({status: "success"});
 }
 
+function toggleMusic(option, callback) {
+  if (window.location.origin.indexOf("pandora.com") != -1) {
+    if ($(".pauseButton").css("display") == "block") {
+      $(".pauseButton").click();
+    } else {
+      $(".playButton").click();
+    }
+  }
+  callback({status: "success"});
+}
+
 function testPausePlayMusic() {
   setTimeout(pauseMusic, 7000);
   setTimeout(pauseMusic, 8000);
@@ -69,6 +80,13 @@ function testPausePlayMusic() {
   setTimeout(playMusic, 13000);
 }
 
+function testToggleMusic() {
+  setTimeout(toggleMusic, 3000);
+  setTimeout(toggleMusic, 7000);
+  setTimeout(toggleMusic, 8000);
+  setTimeout(toggleMusic, 11000);
+}
+
 
 
 var devices = {
@@ -76,15 +94,11 @@ var devices = {
     barrelRollLeft: barrelRollLeft,
     barrellRollRight: barrelRollRight,
     pauseMusic: pauseMusic,
-    playMusic: playMusic
+    playMusic: playMusic,
+    toggleMusic: toggleMusic
   }
 };
 
 console.log(devices.browser.barrelRollLeft);
 
-var client = new BinaryClient('ws://158.130.107.60:9000');
-client.on('stream', function(stream) {
-  stream.on('data', function(data) {
-    stream.write(JSON.stringify(devices));
-  });
-});
+var remote = new BinaryRemote("158.130.107.60", 9000, devices);
