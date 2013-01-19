@@ -90,15 +90,12 @@ function testToggleMusic() {
 
 
 var devices = {
-  browser: {
-    barrelRollLeft: barrelRollLeft,
-    barrellRollRight: barrelRollRight,
-    pauseMusic: pauseMusic,
-    playMusic: playMusic,
-    toggleMusic: toggleMusic
-  }
+  barrelRollLeft: barrelRollLeft,
+  barrelRollRight: barrelRollRight,
+  pauseMusic: pauseMusic,
+  playMusic: playMusic,
+  toggleMusic: toggleMusic
 };
-
-console.log(devices.browser.barrelRollLeft);
+console.log("HI");
 
 var remote = new BinaryRemote("158.130.107.60", 9000, devices);
