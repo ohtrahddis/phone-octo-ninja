@@ -1,6 +1,6 @@
 var Devices = require("../lib/device")
 var devices = {
-    peter : {
+    arduino : {
         tap : function(options, callback) {
             console.log("I WAS TAPPED");
             callback({ status : 'success'})
@@ -12,5 +12,5 @@ var devices = {
     }
 }
 //SET UP
-var remote = new Devices.Client.Remote(devices);
+var remote = new Devices.Driver.TCP(devices);
 remote.listen(8080);
