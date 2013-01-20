@@ -37,6 +37,10 @@ var Vector = {
 }
 
 function findOptimalCoords(realCoords, phoneCoords) {
+  if( phoneCoords.length > realCoords.length) {
+    console.log("More phone coords than real coords");
+    return null;
+  }
   var coords = [];
   for (var i = 0; i < realCoords.length; i++) {
     coords[i] = i;
@@ -159,6 +163,9 @@ var findDevice = function(devices, phoneData, touched, orientation) {
     deviceData[d] = getPlane(convertAxesOut);
   }
   var output = findOptimalCoords(deviceData, phoneData);
+  if (output == null) {
+    return null;
+  }
   var error = output[0];
   var phoneToDevice = output[1];
   console.log(output);
@@ -190,6 +197,9 @@ var phoneData = [{
 }, {
   x: 500,
   y: 700,
+}, {
+  x: 100,
+  y: 200
 }]
 
 var deviceData = [{
@@ -205,7 +215,7 @@ var deviceData = [{
 }]
 
 //console.log(findOptimalCoords(deviceData, phoneData));
-//console.log(findDevice(deviceData, phoneData, 1, testData.orientation));
+console.log(findDevice(deviceData, phoneData, 1, testData.orientation));
 
 exports.convert = convertAxes;
 exports.getPlane = getPlane;
