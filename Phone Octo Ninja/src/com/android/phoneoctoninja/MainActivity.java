@@ -7,6 +7,7 @@ import java.net.InetAddress;
 import java.net.Socket;
 import java.net.UnknownHostException;
 import java.util.List;
+import java.util.Vector;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -19,6 +20,7 @@ import org.opencv.core.Core;
 import org.opencv.core.CvType;
 import org.opencv.core.Mat;
 import org.opencv.core.MatOfPoint;
+import org.opencv.core.Point;
 import org.opencv.core.Rect;
 import org.opencv.core.Scalar;
 import org.opencv.core.Size;
@@ -60,6 +62,11 @@ public class MainActivity extends Activity implements OnTouchListener,
 	float[] rotation = new float[9];
 
 	private Sensor mAccelerometer, mCompass;
+
+	// Debug
+	private Vector<Point> objects = new Vector<Point>();
+	private int touchedObjectIndex = -1;
+	private int TOUCHBOX_SIZE = 150;
 
 	private CameraBridgeViewBase mOpenCvCameraView;
 
@@ -136,7 +143,7 @@ public class MainActivity extends Activity implements OnTouchListener,
 		mBlobColorRgba = new Scalar(255);
 		mBlobColorHsv = new Scalar(255);
 		SPECTRUM_SIZE = new Size(200, 64);
-		CONTOUR_COLOR = new Scalar(255, 0, 0, 255);
+		CONTOUR_COLOR = new Scalar(0, 255, 255, 255);
 	}
 
 	public void onCameraViewStopped() {
@@ -144,6 +151,7 @@ public class MainActivity extends Activity implements OnTouchListener,
 	}
 
 	public boolean onTouch(View v, MotionEvent event) {
+
 		int cols = mRgba.cols();
 		int rows = mRgba.rows();
 
@@ -168,6 +176,34 @@ public class MainActivity extends Activity implements OnTouchListener,
 		touchedRect.height = (y + 4 < rows) ? y + 4 - touchedRect.y : rows
 				- touchedRect.y;
 
+		// Debug - identify if we touch an object
+		Log.d("rect", "ABOUT TO CHECK FOR OBJECTS");
+		if (objects != null) {
+			Log.d("rect", "CHECKING FOR OBJECTS");
+			for (int i = 0; i < objects.size(); i++) {
+				double objx = objects.get(i).x - TOUCHBOX_SIZE; // topleft
+																// corner
+				double objy = objects.get(i).y - TOUCHBOX_SIZE; // topleft
+																// corner
+				if ((objx < touchedRect.x)
+						&& (objy < touchedRect.y)
+						&& (objx + 2 * TOUCHBOX_SIZE > touchedRect.x
+								+ touchedRect.width)
+						&& (objy + 2 * TOUCHBOX_SIZE > touchedRect.y
+								+ touchedRect.height)) {
+	
+					touchedObjectIndex = i;
+					Log.d("rect", "I GOT TOUCHED " + touchedObjectIndex);
+	
+				}
+			}
+		}
+
+		// Debug - only touch once to get the marker color, end further
+		// operation here
+		if (mIsColorSelected)
+			return false;
+
 		Mat touchedRegionRgba = mRgba.submat(touchedRect);
 
 		Mat touchedRegionHsv = new Mat();
@@ -182,7 +218,7 @@ public class MainActivity extends Activity implements OnTouchListener,
 
 		mBlobColorRgba = converScalarHsv2Rgba(mBlobColorHsv);
 
-		Log.i(TAG, "Touched rgba color: (" + mBlobColorRgba.val[0] + ", "
+		Log.e(TAG, "Touched rgba color: (" + mBlobColorRgba.val[0] + ", "
 				+ mBlobColorRgba.val[1] + ", " + mBlobColorRgba.val[2] + ", "
 				+ mBlobColorRgba.val[3] + ")");
 
@@ -237,6 +273,47 @@ public class MainActivity extends Activity implements OnTouchListener,
 		if (mIsColorSelected) {
 			mDetector.process(mRgba);
 			List<MatOfPoint> contours = mDetector.getContours();
+
+			// Debug
+			Vector<Point> centerPts = mDetector.getMassCenters();
+			objects = new Vector<Point>(centerPts.size());
+			for (int x = 0; x < centerPts.size(); x++) {
+				objects.add(new Point(centerPts.get(x).x, centerPts.get(x).y));
+				Core.rectangle(
+						mRgba,
+						new Point(centerPts.get(x).x - TOUCHBOX_SIZE, centerPts
+								.get(x).y - TOUCHBOX_SIZE),
+						new Point(centerPts.get(x).x + TOUCHBOX_SIZE, centerPts
+								.get(x).y + TOUCHBOX_SIZE), new Scalar(0, 0,
+								255));
+			}
+			/*
+			 * // Highlight the touched object if (touchedObjectIndex != -1)
+			 * Core.rectangle( mRgba, new
+			 * Point(centerPts.get(touchedObjectIndex).x - TOUCHBOX_SIZE,
+			 * centerPts .get(touchedObjectIndex).y - TOUCHBOX_SIZE), new
+			 * Point(centerPts.get(touchedObjectIndex).x + TOUCHBOX_SIZE,
+			 * centerPts .get(touchedObjectIndex).y + TOUCHBOX_SIZE), new
+			 * Scalar(255, 0, 255));
+			 */
+
+			Mat circles = mDetector.getCircles();
+			Log.e("circles", circles.cols() + "");
+			for (int x = 0; x < circles.cols(); x++) {
+				double vCircle[] = circles.get(0, x);
+				Log.e("circles", vCircle[0] + "," + vCircle[1] + ","
+						+ vCircle[2] + "");
+				Point center = new Point(Math.round(vCircle[0]),
+						Math.round(vCircle[1]));
+				int radius = (int) Math.round(vCircle[2]);
+				// draw the circle center
+				Core.circle(mRgba, center, 3, new Scalar(0, 255, 0), -1, 8, 0);
+				// draw the circle outline
+				Core.circle(mRgba, center, radius, new Scalar(0, 0, 255), 3, 8,
+						0);
+
+			}
+
 			Log.e(TAG, "Contours count: " + contours.size());
 			Imgproc.drawContours(mRgba, contours, -1, CONTOUR_COLOR);
 
