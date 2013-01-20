@@ -1,21 +1,20 @@
 var Devices = require("../lib/device.js");
 var spawn = require('child_process').spawn;
 
-function screenLeft(option, callback) {
-  spawn('sh', ['switchDeskLeft.sh']);
+function call(option, callback) {
+  spawn('sh', ['call.sh']);
   callback({status: "success"});
-  
 }
 
-function screenRight(option, callback) {
-  spawn('sh', ['switchDeskRight.sh']);
+function text(option, callback) {
+  spawn('sh', ['text.sh']);
   callback({status: "success"});
 }
 
 var devices = {
-    mac : {
-      screenRight: screenRight,
-      screenLeft: screenLeft
+    twilio : {
+      call: call,
+      text: text
     }
 }
 
