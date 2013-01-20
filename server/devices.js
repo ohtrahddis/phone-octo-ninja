@@ -7,7 +7,7 @@ var devices = [{
     z: 0,
     bucket : 'front',
     id: "lightbulb",
-    driver:pg
+    driver: pg
   }, {
     x: 1,
     y: 1,
