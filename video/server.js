@@ -1,5 +1,8 @@
 var Devices = require("../lib/device");
-var videoControl = new Devices.Device("158.130.109.151", new Device.Client.Binary(9090));
+var Device = Devices.Device;
+//var videoControl = new Device("158.130.109.151", new Device.Client.Binary(9090));
+var videoControl = new Device(config[2].id, config[2].driver);
+var config = require('./devices')
 
 var app = require('express')(),
     server = require('http').createServer(app);

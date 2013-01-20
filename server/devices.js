@@ -15,6 +15,13 @@ var devices = [{
     bucket : "left",
     id: "158.130.102.25",
     driver: dg,
-  },
+  }, {
+    x: 1,
+    y: -1,
+    z: 0,
+    bucket : "right",
+    id: "video",
+    driver: pg,
+  }
 ];
 module.exports = devices;
