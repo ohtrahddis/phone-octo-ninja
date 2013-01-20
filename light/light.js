@@ -16,6 +16,8 @@ var status = false;
 arduino.ready(function() {
 	arduino.pin.init(pin, function() {
 		arduino.pin.digitalWrite(pin, false);
+		status = false;
+		console.log("init done");
 	});
 });
 
@@ -29,21 +31,19 @@ function tap() {
 }
 
 function on() {
-	arduino.pin.init(pin, function() {
-		arduino.pin.digitalWrite(pin, false);
-	});
-	status = false;
-}
-
-function off() {
-	arduino.pin.init(pin, function() {
-		arduino.pin.digitalWrite(pin, true);
-	});
+	console.log("turning on");
+	arduino.pin.digitalWrite(pin, true);
 	status = true;
 }
 
+function off() {
+	console.log("turning off");
+	arduino.pin.digitalWrite(pin, false);
+	status = false;
+}
+
 var devices = {
-    arduino : {
+    lightbulb : {
         tap : function(options, callback) {
             console.log("I WAS TAPPED");
             tap();
