@@ -94,7 +94,8 @@ var devices = {
   barrelRollRight: barrelRollRight,
   pauseMusic: pauseMusic,
   playMusic: playMusic,
-  toggleMusic: toggleMusic
+  toggleMusic: toggleMusic,
+  tap: toggleMusic
 };
 console.log("HI");
 
