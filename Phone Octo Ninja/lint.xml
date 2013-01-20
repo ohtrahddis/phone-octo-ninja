@@ -1,4 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <lint>
+<<<<<<< HEAD
+    <issue id="ParserError" severity="ignore" />
+=======
     <issue id="NewApi" severity="ignore" />
+>>>>>>> 580d5cddaf720a1af3d0394cc50e110f5730b718
 </lint>

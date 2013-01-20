@@ -3,13 +3,19 @@ package com.android.phoneoctoninja;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Vector;
 
 import org.opencv.core.Core;
 import org.opencv.core.CvType;
 import org.opencv.core.Mat;
 import org.opencv.core.MatOfPoint;
+import org.opencv.core.Point;
 import org.opencv.core.Scalar;
 import org.opencv.imgproc.Imgproc;
+import org.opencv.imgproc.Moments;
+
+import android.graphics.PointF;
+import android.util.Log;
 
 public class ColorBlobDetector {
     // Lower and Upper bounds for range checking in HSV color space
@@ -18,7 +24,7 @@ public class ColorBlobDetector {
     // Minimum contour area in percent for contours filtering
     private static double mMinContourArea = 0.1;
     // Color radius for range checking in HSV color space
-    private Scalar mColorRadius = new Scalar(25,50,50,0);
+    private Scalar mColorRadius = new Scalar(25,50,50,20);//25,50,50,0);
     private Mat mSpectrum = new Mat();
     private List<MatOfPoint> mContours = new ArrayList<MatOfPoint>();
 
@@ -28,6 +34,11 @@ public class ColorBlobDetector {
     Mat mMask = new Mat();
     Mat mDilatedMask = new Mat();
     Mat mHierarchy = new Mat();
+    
+    //Debug
+    Mat mCircles = new Mat();
+    Mat mGrey = new Mat();
+    Vector<Point> mMassCenters = new Vector<Point>();
 
     public void setColorRadius(Scalar radius) {
         mColorRadius = radius;
@@ -79,7 +90,27 @@ public class ColorBlobDetector {
         List<MatOfPoint> contours = new ArrayList<MatOfPoint>();
 
         Imgproc.findContours(mDilatedMask, contours, mHierarchy, Imgproc.RETR_EXTERNAL, Imgproc.CHAIN_APPROX_SIMPLE);
-
+        
+        //DEBUG
+        //get the moments
+        Vector<Moments> mu = new Vector<Moments>(contours.size());
+        for(int i=0; i<contours.size(); i++)
+        {
+        	mu.add(Imgproc.moments( (contours.get(i)), false ));
+        }
+        //center of mass (needs moments first)
+        Vector<Point> mc = new Vector<Point>( contours.size() );
+        for( int i = 0; i < contours.size(); i++ )
+        { 
+        	mc.add(new Point( (mu.get(i)).get_m10()/mu.get(i).get_m00(), mu.get(i).get_m01()/mu.get(i).get_m00() )); 
+        }
+        
+        //circles
+        Mat circles = new Mat();
+        //Imgproc.cvtColor(mDilatedMask, mGrey, Imgproc.COLOR_RGB2GRAY);
+        Imgproc.HoughCircles(mDilatedMask, circles, Imgproc.CV_HOUGH_GRADIENT, 1d, 2, 150, 75, 0, 0);
+        mCircles = circles;
+        
         // Find max contour area
         double maxArea = 0;
         Iterator<MatOfPoint> each = contours.iterator();
@@ -100,9 +131,30 @@ public class ColorBlobDetector {
                 mContours.add(contour);
             }
         }
+        
+        Iterator<Point> ec;
+        ec = mc.iterator();
+        Vector<Point> temp = new Vector(mc.size());
+        while (ec.hasNext()) {
+            Point pt = ec.next();
+            pt.x *= 4;
+            pt.y *= 4;
+            temp.add(pt);
+        }
+        mMassCenters = temp;
     }
 
     public List<MatOfPoint> getContours() {
         return mContours;
+    }
+    
+    //Debug
+    public Vector<Point> getMassCenters() {
+    	return mMassCenters;
+    }
+    
+    //Debug
+    public Mat getCircles() {
+    	return mCircles;
     }
 }
