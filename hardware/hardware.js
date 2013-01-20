@@ -21,45 +21,94 @@ arduino.ready(function() {
 	});
 });
 
-function tap() {
+function pinTap() {
 	if(status == true) {
-		off();
+		pinOff();
 	}
 	else if(status == false) {
-		on();
+		pinOn();
 	}
 }
 
-function on() {
+function pinOn() {
 	console.log("turning on");
 	arduino.pin.digitalWrite(pin, true);
 	status = true;
 }
 
-function off() {
+function pinOff() {
 	console.log("turning off");
 	arduino.pin.digitalWrite(pin, false);
 	status = false;
 }
 
+
+var arduino2 = new Arduino("/dev/ttyUSB0", {});
+
+arduino2.ready(function() {
+	arduino2.servo.init(9, function() {
+		arduino2.servo.turn(0);
+	});
+});
+
+status2 = false;
+
+function servoTap() {
+	if(status2 == true) {
+		servoOff();
+	}
+	else if(status2 == false) {
+		servoOn();
+	}
+}
+
+function servoOn() {
+	arduino2.servo.turn(180);
+	status2 = true;
+}
+
+function servoOff() {
+	arduino2.servo.turn(0);
+	status2 = false;
+}
+
+
+
 var devices = {
     lightbulb : {
         tap : function(options, callback) {
             console.log("I WAS TAPPED");
-            tap();
+            pinTap();
             callback({ status : 'success'})
         },
         on : function(options, callback) {
             console.log("TURN ON");
-            on();
+            pinOn();
             callback({ status : 'success' });
         },
         off : function(options, callback) {
         	console.log("TURN OFF");
-        	off();
+        	pinOff();
         	callback( { status : 'success' } );
         }
-    }
+    },
+    servo : {
+		tap : function(options, callback) {
+			console.log("i was tapped");
+			servoTap();
+			callback({ status: 'success'})
+		},
+		on : function(options, callback) {
+			console.log("turn on");
+			servoOn();
+			callback({ status: 'success'})
+		},
+		off : function(options, callback) {
+			console.log("turn off");
+			servoOff();
+			callback( {status : 'success' } );
+		}
+	}
 }
 
 
