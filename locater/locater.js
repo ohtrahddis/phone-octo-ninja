@@ -42,7 +42,7 @@ function findOptimalCoords(realCoords, phoneCoords) {
     coords[i] = i;
   }
   return helperFindOptimal([], coords, realCoords, phoneCoords);
-  
+
 }
 
 
@@ -75,7 +75,7 @@ function heuristicDiff(coordsA, coordsB) {
   }
 
 
-  
+
   for (var i = 0; i < distA.length; i++) {
     distA[i] = distA[i] / scaleA;
     distB[i] = distB[i] / scaleB;
@@ -94,7 +94,7 @@ function heuristicDiff(coordsA, coordsB) {
   distDiff = Math.pow(distDiff, .5);
 
   return distDiff + angleDiff;
-  
+
 }
 
 function dist(a, b) {
@@ -158,10 +158,10 @@ var findDevice = function(devices, phoneData, touched, orientation) {
     var convertAxesOut = convertAxes(orientation.axes, points);
     deviceData[d] = getPlane(convertAxesOut);
   }
+  console.log(deviceData, phoneData);
   var output = findOptimalCoords(deviceData, phoneData);
   var error = output[0];
   var phoneToDevice = output[1];
-  console.log(output);
   return devices[phoneToDevice[touched]].id
 }
 
