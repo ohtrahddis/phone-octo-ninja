@@ -6,11 +6,8 @@ import java.io.PrintWriter;
 import java.net.InetAddress;
 import java.net.Socket;
 import java.net.UnknownHostException;
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
-import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.opencv.android.BaseLoaderCallback;
@@ -60,6 +57,7 @@ public class MainActivity extends Activity implements OnTouchListener,
 	float[] accelData = new float[3];
 	float[] compassData = new float[3];
 	float[] orientation = new float[3];
+	float[] rotation = new float[9];
 
 	private Sensor mAccelerometer, mCompass;
 
@@ -197,10 +195,28 @@ public class MainActivity extends Activity implements OnTouchListener,
 		touchedRegionRgba.release();
 		touchedRegionHsv.release();
 		JSONObject or = new JSONObject();
+
+		JSONObject axes = new JSONObject();
 		try {
+			JSONObject aX = new JSONObject();
+			aX.put("y", -rotation[1]);
+			aX.put("x", rotation[4]);
+			aX.put("z", -rotation[7]);
+			JSONObject aY = new JSONObject();
+			aY.put("y", rotation[0]);
+			aY.put("x", -rotation[3]);
+			aY.put("z", rotation[6]);
+			JSONObject aZ = new JSONObject();
+			aZ.put("y", -rotation[2]);
+			aZ.put("x", rotation[5]);
+			aZ.put("z", -rotation[8]);
+			axes.put("x", aX);
+			axes.put("y", aZ);
+			axes.put("z", aY);
+			or.put("axes", axes);
 			or.put("theta", orientation[0] + Math.PI / 2.0);
 			or.put("phi", Math.PI + orientation[2]);
-			or.put("tau", -orientation[1]);
+			or.put("psi", -orientation[1]);
 		} catch (Exception e) {
 			Log.e("accel", "bad", e);
 		}
@@ -261,12 +277,11 @@ public class MainActivity extends Activity implements OnTouchListener,
 		} else {
 			return;
 		}
-		float[] R = new float[16];
 		for (int i = 0; i < 3; i++)
 			data[i] = event.values[i];
 
-		SensorManager.getRotationMatrix(R, null, accelData, compassData);
-		SensorManager.getOrientation(R, orientation);
+		SensorManager.getRotationMatrix(rotation, null, accelData, compassData);
+		SensorManager.getOrientation(rotation, orientation);
 		// Log.d("Accel", Arrays.toString(orientation));
 	}
 
