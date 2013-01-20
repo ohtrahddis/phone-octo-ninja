@@ -1,0 +1,112 @@
+<script src="${tokbox.nwidget.staging_widget_url}/v1.1/js/TB.min.js" ></script>
+<script src="../dist/binaryremote.js"></script>
+<script type="text/javascript" >
+	var apiKey = '22597032';
+	var sessionId = '2_MX4yMjU5NzAzMn4xMjcuMC4wLjF-U2F0IEphbiAxOSAxODozODo1NiBQU1QgMjAxM34wLjAzMTQwODEzfg';
+	var token = 'T1==cGFydG5lcl9pZD0yMjU5NzAzMiZzaWc9MDYzNzJiYmE1ZjM5M2I0NTg4OWJlYjE2NjQyNDZhMzA3NzI2YTFhMjpzZXNzaW9uX2lkPTJfTVg0eU1qVTVOekF6TW40eE1qY3VNQzR3TGpGLVUyRjBJRXBoYmlBeE9TQXhPRG96T0RvMU5pQlFVMVFnTWpBeE0zNHdMakF6TVRRd09ERXpmZyZjcmVhdGVfdGltZT0xMzU4NjQ5NTQzJmV4cGlyZV90aW1lPTEzNjEyNDE1NDMmcm9sZT1tb2RlcmF0b3Imbm9uY2U9MzAzNDY3JnNka192ZXJzaW9uPXRiLWRhc2hib2FyZC1qYXZhc2NyaXB0LXYx';
+	var archive;
+	var archiveId;         
+
+	var session = TB.initSession(sessionId);     
+	session.addEventListener('sessionConnected', sessionConnectedHandler);     
+	session.connect(apiKey, token);
+	 
+	function sessionConnectedHandler(event) {
+	    session.addEventListener('archiveCreated', archiveCreatedHandler);
+	    session.createArchive(apiKey, 'perSession');
+	}
+	 
+	function archiveCreatedHandler(event) {
+	    archive = event.archives[0];
+	    archiveId = archive.archiveId;
+	    alert("Archive created.");
+	}
+
+	function startButtonClickHandler() {
+	    session.addEventListener('sessionRecordingStarted', sessionRecordingStartedHandler);
+	    session.startRecording(archive);
+	}
+	 
+	var publisher;
+	 
+	function sessionRecordingStartedHandler(event) {
+	    // Publish my webcam stream and put it in a div
+	    publisher = session.publish('myPublisherDiv');
+	}
+
+	function stopButtonClickHandler() {
+	    session.addEventListener('sessionRecordingStopped', sessionRecordingStoppedHandler);
+	    session.stopRecording(archive);
+	}
+	 
+	function sessionRecordingStoppedHandler(event) {
+	    session.addEventListener("archiveClosed", archiveClosedHandler);
+	    session.closeArchive(archive);
+	    session.unpublish(publisher);
+	}
+	function archiveClosedHandler(event) {
+	     alert("Recording stopped.");
+	}
+
+	session.addEventListener('archiveLoaded', archiveLoadedHandler);
+	session.loadArchive(archiveId);
+	 
+	function archiveLoadedHandler(event) {
+	    session.addEventListener('playbackStopped', playbackStoppedHandler);
+	    session.addEventListener('streamCreated', streamCreatedHandler);
+	    archive = event.archives[0];
+	    archive.startPlayback();
+	    var playBtn = document.getElementById("playStopBtn");
+	    playBtn.setAttribute('disabled', 'disabled');
+	}
+	 
+	function playbackStoppedHandler(event) {
+	    var playBtn = document.getElementById("playStopBtn");
+	    playBtn.setAttribute('disabled', '');
+	}  
+	 
+	function streamCreatedHandler(event) {
+	    subscribeToStreams(event.streams);
+	}
+	 
+	function subscribeToStreams(streams) {
+	    for (var i = 0; i < streams.length; i++) {
+	        if (streams[i].type == "archive") {
+	            var div = document.createElement('div');
+	            div.setAttribute('id', 'stream' + streams[i].streamId);
+	            document.getElementById('subscriberStreamContainer').appendChild(div);
+	 
+	            session.subscribe(streams[i], div.id);
+	        }
+	    }
+	}
+
+	var devices = {
+	    video : {
+	        record : function(options, callback) {
+	            console.log("BEGINNING RECORDING");
+	            session.startRecording(archive);
+	            callback({ status : 'success'})
+	        },
+	        stop: function(opetions, callback) {
+	        	console.log("STOPPING RECORDING");
+	        	session.stopRecording(archive);
+	            callback({ status : 'success' });
+	        },
+	        play : function(options, callback) {
+	            console.log("PLAYING RECORDED VIDEO");
+	            
+	            callback({ status : 'success' });
+	        },
+	        pause : function(options, callback) {
+	        	console.log("PAUSING RECORDED VIDEO");
+
+	        	callback( { status : 'success' } );
+	        }
+	    }
+	}
+
+
+	var remote = new Devices.Driver.BinaryRemote(devices);
+
+</script>
