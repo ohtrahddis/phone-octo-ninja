@@ -12,5 +12,8 @@ Examples include:
   * pointing at speakers to play, pause, skip forward/back
   * looking at a phone to give it a phone call or enter into a conference call
 
-## poop
-### adasdqweq
+## Examples and Demos
+### Coming soon
+
+## Installation
+### Coming soon
