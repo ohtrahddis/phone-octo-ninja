@@ -13,11 +13,10 @@ function text(option, callback) {
 
 var devices = {
     twilio : {
-      call: call,
-      text: text
+      tap: call
     }
 }
 
 
 var remote = new Devices.Driver.TCP(devices);
-remote.listen(8080);
+remote.listen(8000);
