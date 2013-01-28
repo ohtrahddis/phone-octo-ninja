@@ -48,7 +48,7 @@ import android.widget.Toast;
 public class MainActivity extends Activity implements OnGestureListener,
 		OnTouchListener, CvCameraViewListener, SensorEventListener {
 	private static final int DELAY = SensorManager.SENSOR_DELAY_NORMAL;
-	private static final String TAG = "OCVSample::Activity";
+	private static final String TAG = "rgb";
 	private static final String SERVER_IP = "158.130.107.60";
 	private static final int SERVER_PORT = 1337;
 
@@ -72,6 +72,8 @@ public class MainActivity extends Activity implements OnGestureListener,
 	private Vector<Point> objects = new Vector<Point>();
 	private int touchedObjectIndex = -1;
 	private int TOUCHBOX_SIZE = 75;
+	private Scalar BOXRGB = new Scalar(255, 0, 155);
+	private Scalar TOUCHRGB = new Scalar(0, 256, 22);
 
 	private CameraBridgeViewBase mOpenCvCameraView;
 
@@ -237,8 +239,7 @@ public class MainActivity extends Activity implements OnGestureListener,
 						new Point(centerPts.get(x).x - TOUCHBOX_SIZE, centerPts
 								.get(x).y - TOUCHBOX_SIZE),
 						new Point(centerPts.get(x).x + TOUCHBOX_SIZE, centerPts
-								.get(x).y + TOUCHBOX_SIZE), new Scalar(0, 0,
-								255));
+								.get(x).y + TOUCHBOX_SIZE), BOXRGB);
 			}
 
 			// Highlight the touched object
@@ -252,7 +253,7 @@ public class MainActivity extends Activity implements OnGestureListener,
 						new Point(centerPts.get(touchedObjectIndex).x
 								+ TOUCHBOX_SIZE, centerPts
 								.get(touchedObjectIndex).y + TOUCHBOX_SIZE),
-						new Scalar(255, 0, 255));
+						TOUCHRGB);
 			touchedObjectIndex = -1;
 			Mat circles = mDetector.getCircles();
 			Log.e("circles", circles.cols() + "");
