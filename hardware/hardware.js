@@ -11,12 +11,12 @@ var arduino = new Arduino("/dev/ttyACM0", {});
 //SET UP
 
 var pin = 13;
-var status = false;
+var status = true;
 
 arduino.ready(function() {
 	arduino.pin.init(pin, function() {
-		arduino.pin.digitalWrite(pin, false);
-		status = false;
+		arduino.pin.digitalWrite(pin, true);
+		status = true;
 		console.log("init done");
 	});
 });
@@ -90,6 +90,15 @@ var devices = {
         	console.log("TURN OFF");
         	pinOff();
         	callback( { status : 'success' } );
+        },
+        strobe : function(options, callback) {
+        	console.log("STROBE");
+        	var i;
+        	for(i = 0; i < 25; i++) {
+        		setTimeout(pinOn(), 5);
+        		setTimeout(pinOff(), 5);
+        	}
+        	callback({ status : 'success' });
         }
     },
     servo : {
@@ -107,7 +116,16 @@ var devices = {
 			console.log("turn off");
 			servoOff();
 			callback( {status : 'success' } );
-		}
+		},
+		strobe : function(options, callback) {
+        	console.log("STROBE");
+        	var i;
+        	for(i = 0; i < 25; i++) {
+        		setTimeout(servoOn(), 10);
+        		setTimeout(servoOff(), 10);
+        	}
+        	callback({ status : 'success' });
+        }
 	}
 }
 
