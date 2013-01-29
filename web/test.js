@@ -11,26 +11,30 @@ var barrelRollStyle = $('<style>.barrel_roll_right {-webkit-transition: -webkit-
 $('html > head').append(barrelRollStyle);
 
 function barrelRollLeft(option, callback) {
-  console.log("doing barrel roll left");
-  $('body').addClass('barrel_roll_left');
-  setTimeout(function() {
-    $('body').removeClass('barrel_roll_left')
-  }, 4000);
-  setTimeout(function() {
-    updateFrame();
-  }, 3600);
+  if (window.location.origin.indexOf("pandora.com") != -1) {
+    console.log("doing barrel roll left");
+    $('body').addClass('barrel_roll_left');
+    setTimeout(function() {
+      $('body').removeClass('barrel_roll_left')
+    }, 4000);
+    setTimeout(function() {
+      updateFrame();
+    }, 3600);
+  }
   callback({status: "success"});
 }
 
 
 function barrelRollRight(option, callback) {
-  $('body').addClass('barrel_roll_right');
-  setTimeout(function() {
-    $('body').removeClass('barrel_roll_right')
-  }, 4000);
-  setTimeout(function() {
-    updateFrame();
-  }, 3600);
+  if (window.location.origin.indexOf("pandora.com") != -1) {
+    $('body').addClass('barrel_roll_right');
+    setTimeout(function() {
+      $('body').removeClass('barrel_roll_right')
+    }, 4000);
+    setTimeout(function() {
+      updateFrame();
+    }, 3600);
+  }
   callback({status: "success"});
 }
 
@@ -60,13 +64,28 @@ function pauseMusic(option, callback) {
   callback({status: "success"});
 }
 
-function toggleMusic(option, callback) {
+function tap(option, callback) {
   if (window.location.origin.indexOf("pandora.com") != -1) {
     if ($(".pauseButton").css("display") == "block") {
       $(".pauseButton").click();
     } else {
       $(".playButton").click();
     }
+  } else if (window.location.origin.indexOf("geraldfong.com") != -1) {
+    $('body').addClass('barrel_roll_right');
+    setTimeout(function() {
+      $('body').removeClass('barrel_roll_right')
+    }, 4000);
+    setTimeout(function() {
+      updateFrame();
+    }, 3600);
+  }
+  callback({status: "success"});
+}
+
+function skip(option, callback) {
+  if (window.location.origin.indexOf("pandora.com") != -1) {
+    $(".skipButton").click();
   }
   callback({status: "success"});
 }
@@ -94,8 +113,8 @@ var devices = {
   barrelRollRight: barrelRollRight,
   pauseMusic: pauseMusic,
   playMusic: playMusic,
-  toggleMusic: toggleMusic,
-  tap: toggleMusic
+  tap: tap,
+  skipSong: skip
 };
 console.log("HI");
 

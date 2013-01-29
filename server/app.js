@@ -6,34 +6,58 @@ var config = require('./devices')
 
 var devices = {};
 var buckets = {};
+var gestures = {};
 for (var device in config) {
+    gestures[config[device].id] = config[device].mappings;
     devices[config[device].id] = new Device(config[device].id, config[device].driver);
-    buckets[config[device].id] = config[device].bucket;
+    if (!buckets[config[device].bucket])
+        buckets[config[device].bucket] = []
+    buckets[config[device].bucket].push(config[device])
 }
+console.log(gestures)
+console.log(buckets);
 
 var server = net.createServer(function (socket) {
     socket.on('data', function(data) {
         var obj = JSON.parse(data.toString('ascii'));
+        var event = obj.event;
         var bucket;
         var x = obj.orientation.axes.y.x;
-        if (x > -0.5 && x < 0.5) {
+        if (x > -0.3 && x < 0.7) {
             bucket = 'front';
-        } else if (x < -0.5) {
+        } else if (x < -0.3) {
             bucket = 'left';
-        } else if (x > 0.5) {
+        } else if (x > 0.7) {
             bucket = 'right';
         }
-        for (var device in buckets) {
-            if (bucket == buckets[device]) {
-                console.log("Tapping", device);
-                (function(dev) {
+        console.log(event, bucket)
+        if (buckets[bucket]) {
+            if (buckets[bucket].length > 1)  {
+                device = Locator.findDevice(buckets[bucket], obj.touch.objects, obj.touch.touched, obj.orientation);
+                console.log("FOUND DEVICE:", device)
+            } else {
+                device = buckets[bucket][0].id
+            }
+            (function(dev) {
+                console.log(event, dev);
+                if (event == "tap") {
                     devices[dev].tap(function(results) {
                         if (results.status == "success") {
                             console.log(dev,"tapped successfully!");
                         }
                     })
-                })(device);
-            }
+                } else {
+                    console.log(gestures[dev][event], dev, event);
+                    if (gestures[dev][event]) {
+                        devices[dev].action(gestures[dev][event], {}, function(results) {
+                            console.log(results);
+                            if (results.status == "success") {
+                                console.log(dev,event, "successfully!");
+                            }
+                        })
+                    }
+                }
+            })(device);
         }
     })
 });

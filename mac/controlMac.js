@@ -1,13 +1,21 @@
 var Devices = require("../lib/device.js");
 var spawn = require('child_process').spawn;
 
-function screenLeft(option, callback) {
+var curScreen = 0;
+
+function swipeLeft(option, callback) {
+  if (curScreen != -1) {
+    curScreen--;
+  }
+  console.log("HI");
   spawn('sh', ['switchDeskLeft.sh']);
   callback({status: "success"});
-  
 }
 
-function screenRight(option, callback) {
+function swipeRight(option, callback) {
+  if (curScreen != 2) {
+    curScreen++;
+  }
   spawn('sh', ['switchDeskRight.sh']);
   callback({status: "success"});
 }
@@ -17,11 +25,17 @@ function nextSlide(option, callback) {
   callback({status: "success"});
 }
 
+function tap(option, callback) {
+  spawn('sh', ['nextSlide.sh']);
+  callback({status: "success"});
+}
+
+
 var devices = {
     mac : {
-      screenRight: screenRight,
-      screenLeft: screenLeft,
-      nextSlide: nextSlide
+      swipeRight: swipeRight,
+      swipeLeft: swipeLeft,
+      tap: tap
     }
 }
 

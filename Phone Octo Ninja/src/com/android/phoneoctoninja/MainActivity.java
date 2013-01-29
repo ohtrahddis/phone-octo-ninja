@@ -9,6 +9,7 @@ import java.net.UnknownHostException;
 import java.util.List;
 import java.util.Vector;
 
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.opencv.android.BaseLoaderCallback;
@@ -34,16 +35,20 @@ import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.GestureDetector;
+import android.view.GestureDetector.OnGestureListener;
 import android.view.MotionEvent;
+import android.view.ScaleGestureDetector;
 import android.view.View;
 import android.view.View.OnTouchListener;
 import android.view.Window;
 import android.view.WindowManager;
+import android.widget.Toast;
 
-public class MainActivity extends Activity implements OnTouchListener,
-		CvCameraViewListener, SensorEventListener {
+public class MainActivity extends Activity implements OnGestureListener,
+		OnTouchListener, CvCameraViewListener, SensorEventListener {
 	private static final int DELAY = SensorManager.SENSOR_DELAY_NORMAL;
-	private static final String TAG = "OCVSample::Activity";
+	private static final String TAG = "rgb";
 	private static final String SERVER_IP = "158.130.107.60";
 	private static final int SERVER_PORT = 1337;
 
@@ -66,7 +71,9 @@ public class MainActivity extends Activity implements OnTouchListener,
 	// Debug
 	private Vector<Point> objects = new Vector<Point>();
 	private int touchedObjectIndex = -1;
-	private int TOUCHBOX_SIZE = 150;
+	private int TOUCHBOX_SIZE = 75;
+	private Scalar BOXRGB = new Scalar(255, 0, 155);
+	private Scalar TOUCHRGB = new Scalar(0, 256, 22);
 
 	private CameraBridgeViewBase mOpenCvCameraView;
 
@@ -87,6 +94,8 @@ public class MainActivity extends Activity implements OnTouchListener,
 			}
 		}
 	};
+	private ScaleGestureDetector mScaleDetector;
+	private GestureDetector gestureScanner;
 
 	public MainActivity() {
 		Log.i(TAG, "Instantiated new " + this.getClass());
@@ -98,6 +107,7 @@ public class MainActivity extends Activity implements OnTouchListener,
 		Log.i(TAG, "called onCreate");
 		super.onCreate(savedInstanceState);
 		requestWindowFeature(Window.FEATURE_NO_TITLE);
+		gestureScanner = new GestureDetector(this);
 		getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
 
 		mSensorManager = (SensorManager) getSystemService(Context.SENSOR_SERVICE);
@@ -106,7 +116,6 @@ public class MainActivity extends Activity implements OnTouchListener,
 		mCompass = mSensorManager.getDefaultSensor(Sensor.TYPE_MAGNETIC_FIELD);
 		mSensorManager.registerListener(this, mAccelerometer, DELAY);
 		mSensorManager.registerListener(this, mCompass, DELAY);
-
 		setContentView(R.layout.activity_main);
 
 		mOpenCvCameraView = (CameraBridgeViewBase) findViewById(R.id.color_blob_detection_activity_surface_view);
@@ -177,32 +186,11 @@ public class MainActivity extends Activity implements OnTouchListener,
 				- touchedRect.y;
 
 		// Debug - identify if we touch an object
-		Log.d("rect", "ABOUT TO CHECK FOR OBJECTS");
-		if (objects != null) {
-			Log.d("rect", "CHECKING FOR OBJECTS");
-			for (int i = 0; i < objects.size(); i++) {
-				double objx = objects.get(i).x - TOUCHBOX_SIZE; // topleft
-																// corner
-				double objy = objects.get(i).y - TOUCHBOX_SIZE; // topleft
-																// corner
-				if ((objx < touchedRect.x)
-						&& (objy < touchedRect.y)
-						&& (objx + 2 * TOUCHBOX_SIZE > touchedRect.x
-								+ touchedRect.width)
-						&& (objy + 2 * TOUCHBOX_SIZE > touchedRect.y
-								+ touchedRect.height)) {
-	
-					touchedObjectIndex = i;
-					Log.d("rect", "I GOT TOUCHED " + touchedObjectIndex);
-	
-				}
-			}
-		}
 
 		// Debug - only touch once to get the marker color, end further
 		// operation here
 		if (mIsColorSelected)
-			return false;
+			return gestureScanner.onTouchEvent(event);
 
 		Mat touchedRegionRgba = mRgba.submat(touchedRect);
 
@@ -230,39 +218,6 @@ public class MainActivity extends Activity implements OnTouchListener,
 
 		touchedRegionRgba.release();
 		touchedRegionHsv.release();
-		JSONObject or = new JSONObject();
-
-		JSONObject axes = new JSONObject();
-		try {
-			JSONObject aX = new JSONObject();
-			aX.put("y", -rotation[1]);
-			aX.put("x", rotation[4]);
-			aX.put("z", -rotation[7]);
-			JSONObject aY = new JSONObject();
-			aY.put("y", rotation[0]);
-			aY.put("x", -rotation[3]);
-			aY.put("z", rotation[6]);
-			JSONObject aZ = new JSONObject();
-			aZ.put("y", -rotation[2]);
-			aZ.put("x", rotation[5]);
-			aZ.put("z", -rotation[8]);
-			axes.put("x", aX);
-			axes.put("y", aZ);
-			axes.put("z", aY);
-			or.put("axes", axes);
-			or.put("theta", orientation[0] + Math.PI / 2.0);
-			or.put("phi", Math.PI + orientation[2]);
-			or.put("psi", -orientation[1]);
-		} catch (Exception e) {
-			Log.e("accel", "bad", e);
-		}
-		JSONObject obj = new JSONObject();
-		try {
-			obj.put("orientation", or);
-		} catch (JSONException e) {
-			e.printStackTrace();
-		}
-		new Thread(new SocketThread(SERVER_IP, SERVER_PORT, obj)).start();
 
 		return false;
 	}
@@ -284,19 +239,22 @@ public class MainActivity extends Activity implements OnTouchListener,
 						new Point(centerPts.get(x).x - TOUCHBOX_SIZE, centerPts
 								.get(x).y - TOUCHBOX_SIZE),
 						new Point(centerPts.get(x).x + TOUCHBOX_SIZE, centerPts
-								.get(x).y + TOUCHBOX_SIZE), new Scalar(0, 0,
-								255));
+								.get(x).y + TOUCHBOX_SIZE), BOXRGB);
 			}
-			/*
-			 * // Highlight the touched object if (touchedObjectIndex != -1)
-			 * Core.rectangle( mRgba, new
-			 * Point(centerPts.get(touchedObjectIndex).x - TOUCHBOX_SIZE,
-			 * centerPts .get(touchedObjectIndex).y - TOUCHBOX_SIZE), new
-			 * Point(centerPts.get(touchedObjectIndex).x + TOUCHBOX_SIZE,
-			 * centerPts .get(touchedObjectIndex).y + TOUCHBOX_SIZE), new
-			 * Scalar(255, 0, 255));
-			 */
 
+			// Highlight the touched object
+			if (touchedObjectIndex != -1
+					&& centerPts.size() > touchedObjectIndex)
+				Core.rectangle(
+						mRgba,
+						new Point(centerPts.get(touchedObjectIndex).x
+								- TOUCHBOX_SIZE, centerPts
+								.get(touchedObjectIndex).y - TOUCHBOX_SIZE),
+						new Point(centerPts.get(touchedObjectIndex).x
+								+ TOUCHBOX_SIZE, centerPts
+								.get(touchedObjectIndex).y + TOUCHBOX_SIZE),
+						TOUCHRGB);
+			touchedObjectIndex = -1;
 			Mat circles = mDetector.getCircles();
 			Log.e("circles", circles.cols() + "");
 			for (int x = 0; x < circles.cols(); x++) {
@@ -397,6 +355,152 @@ public class MainActivity extends Activity implements OnTouchListener,
 				e.printStackTrace();
 			}
 		}
+
+	}
+
+	private void toast(String message) {
+		Log.d("gesture", message);
+		// Toast.makeText(getBaseContext(), message, Toast.LENGTH_SHORT).show();
+	}
+
+	@Override
+	public boolean onDown(MotionEvent e) {
+		toast("down");
+		return true;
+	}
+
+	@Override
+	public boolean onFling(MotionEvent e1, MotionEvent e2, float velocityX,
+			float velocityY) {
+		float startX = e1.getX();
+		float startY = e1.getY();
+		float endX = e2.getX();
+		float endY = e2.getY();
+		int index = -1;
+		if (objects != null) {
+			for (int i = 0; i < objects.size(); i++) {
+				double objx = objects.get(i).x - TOUCHBOX_SIZE; // topleft
+																// corner
+				double objy = objects.get(i).y - TOUCHBOX_SIZE; // topleft
+																// corner
+				if ((objx < startX) && (objy < startY)
+						&& (objx + 2 * TOUCHBOX_SIZE > startX)
+						&& (objy + 2 * TOUCHBOX_SIZE > startY)) {
+					index = i;
+
+				}
+			}
+		}
+		if (index != -1)
+			if (startX - endX < -100) {
+				send("swipe right", index);
+				toast("swipe right");
+			} else if (startX - endX > 100) {
+				send("swipe left", index);
+				toast("swipe left");
+			}
+		return true;
+	}
+
+	@Override
+	public void onLongPress(MotionEvent e) {
+		toast("long press");
+	}
+
+	@Override
+	public boolean onScroll(MotionEvent e1, MotionEvent e2, float distanceX,
+			float distanceY) {
+		toast("scroll");
+		return true;
+	}
+
+	@Override
+	public void onShowPress(MotionEvent e) {
+	}
+
+	@Override
+	public boolean onSingleTapUp(MotionEvent e) {
+		float x = e.getX(), y = e.getY();
+		Log.d("rect", "ABOUT TO CHECK FOR OBJECTS");
+		if (objects != null) {
+			Log.d("rect", "CHECKING FOR OBJECTS");
+			for (int i = 0; i < objects.size(); i++) {
+				double objx = objects.get(i).x - TOUCHBOX_SIZE; // topleft
+																// corner
+				double objy = objects.get(i).y - TOUCHBOX_SIZE; // topleft
+																// corner
+				if ((objx < x) && (objy < y) && (objx + 2 * TOUCHBOX_SIZE > x)
+						&& (objy + 2 * TOUCHBOX_SIZE > y)) {
+
+					touchedObjectIndex = i;
+					Log.d("rect", "I GOT TOUCHED " + touchedObjectIndex);
+
+				}
+			}
+		}
+		if (touchedObjectIndex != -1) {
+			toast("single tap up");
+			send("tap", touchedObjectIndex);
+		}
+		touchedObjectIndex = -1;
+		return true;
+	}
+
+	public void send(String event, int index) {
+		JSONObject touch = new JSONObject();
+		JSONArray objs = new JSONArray();
+		for (Point o : objects) {
+			JSONObject pt = new JSONObject();
+			try {
+				pt.put("x", o.x);
+				pt.put("y", o.y);
+			} catch (JSONException ex) {
+				ex.printStackTrace();
+			}
+			objs.put(pt);
+		}
+		JSONObject or = new JSONObject();
+		try {
+			touch.put("objects", objs);
+			touch.put("touched", index);
+		} catch (JSONException e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
+		}
+
+		JSONObject axes = new JSONObject();
+		try {
+			JSONObject aX = new JSONObject();
+			aX.put("y", -rotation[1]);
+			aX.put("x", rotation[4]);
+			aX.put("z", -rotation[7]);
+			JSONObject aY = new JSONObject();
+			aY.put("y", rotation[0]);
+			aY.put("x", -rotation[3]);
+			aY.put("z", rotation[6]);
+			JSONObject aZ = new JSONObject();
+			aZ.put("y", -rotation[2]);
+			aZ.put("x", rotation[5]);
+			aZ.put("z", -rotation[8]);
+			axes.put("x", aX);
+			axes.put("y", aZ);
+			axes.put("z", aY);
+			or.put("axes", axes);
+			// or.put("theta", orientation[0] + Math.PI / 2.0);
+			// or.put("phi", Math.PI + orientation[2]);
+			// or.put("psi", -orientation[1]);
+		} catch (Exception ex) {
+			Log.e("accel", "bad", ex);
+		}
+		JSONObject obj = new JSONObject();
+		try {
+			obj.put("orientation", or);
+			obj.put("touch", touch);
+			obj.put("event", event);
+		} catch (JSONException ex) {
+			ex.printStackTrace();
+		}
+		new Thread(new SocketThread(SERVER_IP, SERVER_PORT, obj)).start();
 
 	}
 }
