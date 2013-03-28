@@ -1,5 +1,5 @@
 # EyePhone
-![GitHub Logo](http://3.bp.blogspot.com/-U470YNIETuE/T-nL_BL5NkI/AAAAAAAAAHs/R2Bq7_BqwSk/s200/eye.jpg)
+![EyePhone](http://3.bp.blogspot.com/-U470YNIETuE/T-nL_BL5NkI/AAAAAAAAAHs/R2Bq7_BqwSk/s200/eye.jpg)
 
 ## About
 ### EyePhone takes augmented reality one step further by allowing users to actually influence the physical world around them rather than merely augmenting it with information.
